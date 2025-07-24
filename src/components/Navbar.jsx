@@ -44,7 +44,7 @@ export default function Navbar() {
                     <Link to={"/linkQr"} className='hover:text-gray-300'>Add QR</Link>
                 </li>
                 <li>
-                    <Link to={"/QRdashboard"} className='hover:text-gray-300'>QR Links</Link>
+                    <Link to={"/QRdashboard"} className='hover:text-gray-300'>QR Dashboard</Link>
                 </li>
                 <li>
                     <button className='hover:text-red-500 transition' onClick={handleLogout}>Logout</button>

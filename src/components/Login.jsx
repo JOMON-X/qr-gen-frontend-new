@@ -37,7 +37,7 @@ export default function Login() {
       }else{
         ShowToast(loginDt.data.msg,"error")
       }
-      console.log(loginDt);
+     
     } catch (error) {
       console.log(error);
       

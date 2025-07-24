@@ -1,5 +1,5 @@
 import React, { useState } from 'react'
-import { Link } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
 import axios from 'axios'
 import { useDocumentTitle } from '../utilities/useDocumentTitle'
 import { ToastContainer } from 'react-toastify'
@@ -9,6 +9,7 @@ export default function Register() {
     useDocumentTitle("Register - UltimateQR","Please register to get an account")
 
     const backendUrl = import.meta.env.VITE_BACKEND_URL
+    const navigate = useNavigate()
 
     const [userDt,setUserDt] = useState({
         uname:'',
@@ -28,9 +29,10 @@ export default function Register() {
         e.preventDefault()
         try {
             const response = await axios.post(`${backendUrl}userApi/regUser`,userDt)
-            console.log(response)
+            
             if (response.data.regsts === "0") {
                 ShowToast(response.data.msg,"success")
+                setTimeout(()=>navigate('/login'),2000)
             }
         } catch (error) {
             console.log(error)

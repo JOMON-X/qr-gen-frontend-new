@@ -4,15 +4,22 @@ import { QRCodeCanvas } from 'qrcode.react'
 import axios from 'axios'
 import { ToastContainer } from 'react-toastify'
 import { ShowToast } from '../utilities/ShowToast'
+import { useLocation, useNavigate } from 'react-router-dom'
 
 export default function LinkQr() {
+
+    const location = useLocation()
+
+    const qrData = location.state?.qrData || null
+
+    const navigate = useNavigate()
     
     useDocumentTitle("QR Generator - UltimateQR","Turn links in to QR")
 
     const backendUrl = import.meta.env.VITE_BACKEND_URL
 
-    const [qrLink,setQrLink] = useState("")
-    const [qrColor,setQrColor] = useState("#000000")
+    const [qrLink,setQrLink] = useState(qrData?qrData.qrLink:"")
+    const [qrColor,setQrColor] = useState(qrData?qrData.qrColor:"#000000")
 
     const qRef = useRef()
     const downloadQr =()=>{
@@ -28,28 +35,49 @@ export default function LinkQr() {
         const utoken = localStorage.getItem("utoken")
 
         try {
-            const response = await axios.post(`${backendUrl}userApi/addLinkQr`,{
-                qrLink:qrLink,
-                qrColor:qrColor
-            },
-            {
-                headers:{
-                    "Content-Type":'application/json',
-                    Authorization:`Bearer ${utoken}`
-                }
+            let response
+
+            if (qrData) {
+                response = await axios.post(`${backendUrl}userApi/editQR/${qrData._id}`,
+                  {
+                    qrLink: qrLink,
+                    qrColor: qrColor,
+                  },
+                  {
+                    headers: {
+                      "Content-Type": "application/json",
+                      Authorization: `Bearer ${utoken}`,
+                    },
+                  }
+                )
+                setTimeout(()=>navigate('/QRdashboard'),2000)
+            } else {
+                response = await axios.post(`${backendUrl}userApi/addLinkQr`,
+                  {
+                    qrLink: qrLink,
+                    qrColor: qrColor,
+                  },
+                  {
+                    headers: {
+                      "Content-Type": "application/json",
+                      Authorization: `Bearer ${utoken}`,
+                    },
+                  }
+                )
+                setTimeout(()=>navigate('/QRdashboard'),2000)
             }
-        )
-        console.log(response.data);
+                
         
-        if (response.data.addsts == "0") {
-            ShowToast(response.data.msg,"success")
-        } else {
-            ShowToast(response.data.msg,"error")
-        }
+            if (response.data.addsts == "0") {
+                ShowToast(response.data.msg,"success")
+            } else if (response.data.editsts == "0") {
+                ShowToast(response.data.msg,"success")
+            }else {
+                ShowToast(response.data.msg,"error")
+            }
         
         } catch (error) {
             console.log(error);
-            
         }
     }
 
@@ -60,9 +88,20 @@ export default function LinkQr() {
 
         <h1 className='text-2xl mb-4 font-bold'>Generate QR</h1>
         
-        <input type="text" placeholder='Enter your URL' className='mb-4 p-2 border rounded w-80'onChange={(e)=>setQrLink(e.target.value)}/>
+        <input 
+        type="text" 
+        placeholder='Enter your URL' 
+        className='mb-4 p-2 border rounded w-80'
+        onChange={(e)=>setQrLink(e.target.value)}
+        value={qrLink}
+        />
 
-        <input type="color" value={qrColor} className='mb-4 p-2 border rounded w-15' onChange={(e)=>setQrColor(e.target.value)} />
+        <input 
+        type="color" 
+        value={qrColor} 
+        className='mb-4 p-2 border rounded w-15' 
+        onChange={(e)=>setQrColor(e.target.value)} 
+        />
 
         <div ref={qRef} className='bg-white p-2 rounded-lg shadow-lg'>
 
